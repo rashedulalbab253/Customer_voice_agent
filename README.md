@@ -21,17 +21,27 @@ With seamless integration of leading AI, vector search, and web technologies, th
 
 ## 🏗️ Architecture Overview
 
-```mermaid
+
 flowchart TD
+
     User[User: asks question] -->|Web UI| Streamlit[Streamlit App]
+    
     Streamlit -->|Crawl| Firecrawl[Firecrawl: Crawl Docs]
+    
     Firecrawl -->|Docs| Embeddings[fastembed: Create Embeddings]
+    
     Embeddings -->|Vectors| Qdrant[Qdrant: Vector DB]
+    
     Streamlit -->|User Query| Embeddings
+    
     Embeddings -->|Query Vector| Qdrant
+    
     Qdrant -->|Relevant Docs| OpenAIQA[Processor Agent (OpenAI GPT-4o)]
+    
     OpenAIQA -->|Answer| OpenAITTS[TTS Agent (OpenAI TTS)]
+    
     OpenAITTS -->|Audio| Streamlit
+    
     Streamlit -->|Text, Audio, Sources| User
 ```
 
