@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechGadgets AI - Premium Support</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Inter:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="logo-icon">TG</div>
+                <h2>TechGadgets <span>Pro</span></h2>
+            </div>
+
+            <div class="settings-group">
+                <label for="apiKey">Groq API Key</label>
+                <input type="password" id="apiKey" placeholder="gsk_...">
+
+                <label for="userId">Customer ID</label>
+                <input type="text" id="userId" placeholder="cust_001">
+
+                <button id="initAgent" class="btn primary">Initialize Agent</button>
+            </div>
+
+            <div class="actions-group">
+                <button id="genProfile" class="btn secondary">Generate Mock Profile</button>
+                <button id="viewMemories" class="btn secondary">View Memory Stats</button>
+            </div>
+
+            <div id="profileDisplay" class="profile-card hidden">
+                <h3>Customer Profile</h3>
+                <pre id="profileJson"></pre>
+            </div>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="chat-area">
+            <header class="chat-header">
+                <div class="status-indicator">
+                    <span class="dot"></span>
+                    <span id="agentStatus">Agent Offline</span>
+                </div>
+                <div class="header-actions">
+                    <button id="clearChat" title="Clear Chat"><i class="fas fa-trash"></i></button>
+                </div>
+            </header>
+
+            <div id="chatMessages" class="chat-messages">
+                <div class="message assistant">
+                    <div class="bubble">
+                        Hello! I am your TechGadgets AI assistant. Please provide your API Key and Customer ID to get
+                        started.
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input-container">
+                <div class="input-wrapper">
+                    <button id="micBtn" class="btn-mic" title="Voice Input">
+                        <svg viewBox="0 0 24 24" width="24" height="24">
+                            <path fill="currentColor"
+                                d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z" />
+                            <path fill="currentColor"
+                                d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z" />
+                        </svg>
+                    </button>
+                    <input type="text" id="userInput" placeholder="Ask about your orders, preferences..."
+                        autocomplete="off">
+                    <button id="sendBtn" class="btn-send">
+                        <svg viewBox="0 0 24 24" width="24" height="24">
+                            <path fill="currentColor" d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="voice-controls">
+                    <label class="switch">
+                        <input type="checkbox" id="autoSpeak">
+                        <span class="slider round"></span>
+                    </label>
+                    <span class="voice-label">Auto-Speak Response</span>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal for Memories -->
+    <div id="memoryModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Current User Memories</h2>
+            <ul id="memoryList"></ul>
+        </div>
+    </div>
+
+    <script src="/static/script.js"></script>
+</body>
+
+</html>

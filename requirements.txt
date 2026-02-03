@@ -1,7 +1,10 @@
-firecrawl-py
+fastapi
+uvicorn
+groq
+mem0ai
 qdrant-client
-streamlit
+pydantic-settings
+python-dotenv
+firecrawl-py
 fastembed
-openai>=1.0.0
-python-dotenv 
-openai-agents
+python-multipart
