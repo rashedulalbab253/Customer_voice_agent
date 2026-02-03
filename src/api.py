@@ -9,6 +9,8 @@ import os
 from src.agent import CustomerSupportAgent
 from src.config import settings
 from src.utils import logger
+from src.analytics import analytics
+import time
 
 app = FastAPI(title="TechGadgets AI Support API")
 
@@ -52,11 +54,24 @@ async def read_index():
 @app.post("/chat")
 async def chat(data: ChatQuery):
     try:
+        start_time = time.time()
         current_agent = get_agent(data.api_key)
         response = current_agent.handle_query(data.query, user_id=data.user_id)
+        response_time = time.time() - start_time
+        
+        # Log analytics
+        analytics.log_interaction(
+            user_id=data.user_id,
+            query=data.query,
+            response=response,
+            response_time=response_time
+        )
+        
         return {"response": response}
     except Exception as e:
-        logger.error(f"Chat error: {e}")
+        import traceback
+        error_detail = traceback.format_exc()
+        logger.error(f"Chat error: {e}\n{error_detail}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/generate-profile")
@@ -80,6 +95,43 @@ async def get_memories(user_id: str):
         return {"memories": memories}
     except Exception as e:
         logger.error(f"Memory retrieval error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Analytics Endpoints
+@app.get("/analytics/summary")
+async def get_analytics_summary():
+    """Get overall analytics summary."""
+    try:
+        return analytics.get_summary_stats()
+    except Exception as e:
+        logger.error(f"Analytics summary error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/analytics/user/{user_id}")
+async def get_user_analytics(user_id: str):
+    """Get analytics for a specific user."""
+    try:
+        return analytics.get_user_stats(user_id)
+    except Exception as e:
+        logger.error(f"User analytics error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/analytics/recent")
+async def get_recent_interactions(limit: int = 10):
+    """Get recent interactions."""
+    try:
+        return {"interactions": analytics.get_recent_interactions(limit)}
+    except Exception as e:
+        logger.error(f"Recent interactions error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/analytics/top-users")
+async def get_top_users(limit: int = 5):
+    """Get most active users."""
+    try:
+        return {"top_users": analytics.get_top_users(limit)}
+    except Exception as e:
+        logger.error(f"Top users error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 # Mount static files

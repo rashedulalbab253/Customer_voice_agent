@@ -24,31 +24,65 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (recognition) {
         recognition.continuous = false;
-        recognition.interimResults = false;
+        recognition.interimResults = true;  // Show what's being said in real-time
         recognition.lang = 'en-US';
+        recognition.maxAlternatives = 3;  // Get multiple interpretations
 
         recognition.onstart = () => {
             isRecording = true;
             micBtn.classList.add('recording');
-            updateStatus(true, 'Listening...');
+            updateStatus(true, 'Listening... (speak clearly)');
+            userInput.value = '';  // Clear input when starting
+            userInput.placeholder = 'Listening...';
         };
 
         recognition.onend = () => {
             isRecording = false;
             micBtn.classList.remove('recording');
             updateStatus(true, 'Agent Online');
+            userInput.placeholder = 'Ask about your orders, preferences...';
         };
 
         recognition.onresult = (event) => {
-            const transcript = event.results[0][0].transcript;
-            userInput.value = transcript;
-            sendMessage();
+            let interimTranscript = '';
+            let finalTranscript = '';
+
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const transcript = event.results[i][0].transcript;
+                if (event.results[i].isFinal) {
+                    finalTranscript += transcript + ' ';
+                } else {
+                    interimTranscript += transcript;
+                }
+            }
+
+            // Show interim results in the input box
+            if (interimTranscript) {
+                userInput.value = interimTranscript;
+                userInput.style.fontStyle = 'italic';
+            }
+
+            // When final, send the message
+            if (finalTranscript) {
+                userInput.value = finalTranscript.trim();
+                userInput.style.fontStyle = 'normal';
+                sendMessage();
+            }
         };
 
         recognition.onerror = (event) => {
             console.error('Speech recognition error:', event.error);
             isRecording = false;
             micBtn.classList.remove('recording');
+            updateStatus(true, 'Agent Online');
+
+            if (event.error === 'no-speech') {
+                userInput.placeholder = 'No speech detected. Try again.';
+            } else if (event.error === 'audio-capture') {
+                alert('Microphone not found. Please check your microphone settings.');
+            } else if (event.error === 'not-allowed') {
+                alert('Microphone access denied. Please allow microphone access.');
+            }
         };
     }
 
@@ -59,15 +93,48 @@ document.addEventListener('DOMContentLoaded', () => {
         window.speechSynthesis.cancel();
 
         const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = 1.0;
+        utterance.rate = 0.95;  // Slightly slower for clarity
         utterance.pitch = 1.0;
+        utterance.volume = 1.0;
 
-        // Find a higher quality voice if available
-        const voices = window.speechSynthesis.getVoices();
-        const preferredVoice = voices.find(v => v.name.includes('Google') || v.name.includes('Premium')) || voices[0];
-        if (preferredVoice) utterance.voice = preferredVoice;
+        // Wait for voices to load, then select the best one
+        const setVoice = () => {
+            const voices = window.speechSynthesis.getVoices();
 
-        window.speechSynthesis.speak(utterance);
+            // Prefer these voices in order (more natural sounding)
+            const preferredVoices = [
+                'Google US English',
+                'Microsoft Zira',
+                'Microsoft David',
+                'Google UK English Female',
+                'Samantha',
+                'Alex'
+            ];
+
+            let selectedVoice = null;
+            for (const preferred of preferredVoices) {
+                selectedVoice = voices.find(v => v.name.includes(preferred));
+                if (selectedVoice) break;
+            }
+
+            // Fallback to any English voice
+            if (!selectedVoice) {
+                selectedVoice = voices.find(v => v.lang.startsWith('en'));
+            }
+
+            if (selectedVoice) {
+                utterance.voice = selectedVoice;
+            }
+
+            window.speechSynthesis.speak(utterance);
+        };
+
+        // Voices might not be loaded yet
+        if (window.speechSynthesis.getVoices().length > 0) {
+            setVoice();
+        } else {
+            window.speechSynthesis.onvoiceschanged = setVoice;
+        }
     };
 
     // --- Helper Functions ---
@@ -203,6 +270,60 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
+    const fetchAnalytics = async () => {
+        try {
+            const response = await fetch('/analytics/summary');
+            const data = await response.json();
+
+            document.getElementById('totalInteractions').textContent = data.total_interactions;
+            document.getElementById('uniqueUsers').textContent = data.unique_users;
+            document.getElementById('avgResponseTime').textContent = `${data.avg_response_time}s`;
+            document.getElementById('avgQueryLength').textContent = Math.round(data.avg_query_length);
+
+            // Fetch top users
+            const topUsersResponse = await fetch('/analytics/top-users');
+            const topUsersData = await topUsersResponse.json();
+            const topUsersList = document.getElementById('topUsersList');
+            topUsersList.innerHTML = '';
+
+            if (topUsersData.top_users.length === 0) {
+                topUsersList.innerHTML = '<li>No data yet</li>';
+            } else {
+                topUsersData.top_users.forEach(user => {
+                    const li = document.createElement('li');
+                    li.textContent = `${user.user_id}: ${user.total_queries} queries`;
+                    topUsersList.appendChild(li);
+                });
+            }
+
+            // Fetch recent interactions
+            const recentResponse = await fetch('/analytics/recent?limit=5');
+            const recentData = await recentResponse.json();
+            const recentDiv = document.getElementById('recentInteractions');
+            recentDiv.innerHTML = '';
+
+            if (recentData.interactions.length === 0) {
+                recentDiv.innerHTML = '<p>No interactions yet</p>';
+            } else {
+                recentData.interactions.forEach(interaction => {
+                    const card = document.createElement('div');
+                    card.className = 'interaction-card';
+                    card.innerHTML = `
+                        <strong>${interaction.user_id}</strong>
+                        <p><em>Q:</em> ${interaction.query.substring(0, 50)}...</p>
+                        <p><em>A:</em> ${interaction.response.substring(0, 50)}...</p>
+                        <small>${interaction.response_time.toFixed(2)}s</small>
+                    `;
+                    recentDiv.appendChild(card);
+                });
+            }
+
+            document.getElementById('analyticsModal').classList.remove('hidden');
+        } catch (error) {
+            alert('Failed to fetch analytics');
+        }
+    };
+
     // --- Event Listeners ---
 
     initBtn.addEventListener('click', initializeAgent);
@@ -226,10 +347,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     genProfileBtn.addEventListener('click', generateProfile);
     viewMemoriesBtn.addEventListener('click', fetchMemories);
+    document.getElementById('viewAnalytics').addEventListener('click', fetchAnalytics);
 
     // Modal close
     document.querySelector('.close').addEventListener('click', () => {
         document.getElementById('memoryModal').classList.add('hidden');
+    });
+
+    document.querySelector('.close-analytics').addEventListener('click', () => {
+        document.getElementById('analyticsModal').classList.add('hidden');
     });
 
     // Clear chat

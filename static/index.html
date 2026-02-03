@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TechGadgets AI - Premium Support</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/style.css?v=2">
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Inter:wght@400;500;700&display=swap"
         rel="stylesheet">
@@ -34,6 +34,7 @@
             <div class="actions-group">
                 <button id="genProfile" class="btn secondary">Generate Mock Profile</button>
                 <button id="viewMemories" class="btn secondary">View Memory Stats</button>
+                <button id="viewAnalytics" class="btn secondary">📊 Analytics Dashboard</button>
             </div>
 
             <div id="profileDisplay" class="profile-card hidden">
@@ -50,7 +51,12 @@
                     <span id="agentStatus">Agent Offline</span>
                 </div>
                 <div class="header-actions">
-                    <button id="clearChat" title="Clear Chat"><i class="fas fa-trash"></i></button>
+                    <button id="clearChat" title="Clear Chat">
+                        <svg viewBox="0 0 24 24" width="20" height="20">
+                            <path fill="currentColor"
+                                d="M19 4h-3.5l-1-1h-5l-1 1H5v2h14V4zM6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM8 9h8v10H8V9z" />
+                        </svg>
+                    </button>
                 </div>
             </header>
 
@@ -98,6 +104,43 @@
             <span class="close">&times;</span>
             <h2>Current User Memories</h2>
             <ul id="memoryList"></ul>
+        </div>
+    </div>
+
+    <!-- Modal for Analytics -->
+    <div id="analyticsModal" class="modal hidden">
+        <div class="modal-content analytics-modal">
+            <span class="close-analytics">&times;</span>
+            <h2>📊 Analytics Dashboard</h2>
+
+            <div class="analytics-grid">
+                <div class="stat-card">
+                    <h3>Total Interactions</h3>
+                    <p id="totalInteractions" class="stat-value">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Unique Users</h3>
+                    <p id="uniqueUsers" class="stat-value">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Avg Response Time</h3>
+                    <p id="avgResponseTime" class="stat-value">0s</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Avg Query Length</h3>
+                    <p id="avgQueryLength" class="stat-value">0</p>
+                </div>
+            </div>
+
+            <div class="analytics-section">
+                <h3>📈 Top Active Users</h3>
+                <ul id="topUsersList"></ul>
+            </div>
+
+            <div class="analytics-section">
+                <h3>🕒 Recent Interactions</h3>
+                <div id="recentInteractions"></div>
+            </div>
         </div>
     </div>
 
