@@ -3,13 +3,12 @@ from datetime import datetime, timedelta
 from typing import Optional, Dict, Any, List
 
 from groq import Groq
-from mem0 import Memory
 
 from src.config import settings
 from src.utils import logger
 
 class CustomerSupportAgent:
-    """Core logic for the AI Customer Support Agent with memory (using Groq)."""
+    """Core logic for the AI Customer Support Agent with simple memory (using Groq)."""
     
     def __init__(self, api_key: Optional[str] = None):
         # Use provided API key or fallback to settings
@@ -20,54 +19,32 @@ class CustomerSupportAgent:
         self.client = Groq(api_key=key)
         self.app_id = settings.APP_ID
         
-        # Initialize Memory (Mem0) with Qdrant
-        config = {
-            "vector_store": {
-                "provider": settings.MEMORY_PROVIDER,
-                "config": {
-                    # For local development without Docker, use local path
-                    "path": "qdrant_data", 
-                    # "host": settings.QDRANT_HOST,
-                    # "port": settings.QDRANT_PORT,
-                }
-            },
-            "llm": {
-                "provider": "groq",
-                "config": {
-                    "api_key": key,
-                    "model": settings.GROQ_MODEL
-                }
-            }
-        }
-        
-        try:
-            self.memory = Memory.from_config(config)
-            logger.info("Memory initialized successfully with Qdrant and Groq.")
-        except Exception as e:
-            logger.error(f"Failed to initialize memory: {e}")
-            raise
+        # Simple in-memory storage for conversations
+        self.conversations: Dict[str, List[Dict[str, str]]] = {}
+        logger.info("Agent initialized successfully with Groq.")
 
     def handle_query(self, query: str, user_id: str) -> str:
-        """Handles a customer query by retrieving memory context and generating a response."""
+        """Handles a customer query by retrieving conversation history and generating a response."""
         try:
             logger.info(f"Handling query for user {user_id}: {query[:50]}...")
             
-            # Search for relevant memories
-            relevant_memories = self.memory.search(query=query, user_id=user_id)
+            # Get or create conversation history for this user
+            if user_id not in self.conversations:
+                self.conversations[user_id] = []
             
-            # Build context from relevant memories
-            context = "Relevant past information:\n"
-            if relevant_memories and "results" in relevant_memories:
-                for memory in relevant_memories["results"]:
-                    if "memory" in memory:
-                        context += f"- {memory['memory']}\n"
-
-            # Generate response via Groq
+            # Build messages from conversation history
             messages = [
-                {"role": "system", "content": "You are a professional customer support AI agent for TechGadgets.com. Use the provided context to give personalized help."},
-                {"role": "user", "content": f"{context}\nCustomer Query: {query}"}
+                {"role": "system", "content": "You are a professional customer support AI agent for TechGadgets.com, an online electronics store. Be helpful, friendly, and remember the context of the conversation."}
             ]
             
+            # Add conversation history (last 10 messages to keep context manageable)
+            for msg in self.conversations[user_id][-10:]:
+                messages.append(msg)
+            
+            # Add current query
+            messages.append({"role": "user", "content": query})
+            
+            # Generate response via Groq
             response = self.client.chat.completions.create(
                 model=settings.GROQ_MODEL,
                 messages=messages
@@ -75,9 +52,9 @@ class CustomerSupportAgent:
             
             answer = response.choices[0].message.content
             
-            # Store interaction in memory
-            self.memory.add(query, user_id=user_id, metadata={"app_id": self.app_id, "role": "user"})
-            self.memory.add(answer, user_id=user_id, metadata={"app_id": self.app_id, "role": "assistant"})
+            # Store interaction in conversation history
+            self.conversations[user_id].append({"role": "user", "content": query})
+            self.conversations[user_id].append({"role": "assistant", "content": answer})
             
             return answer
             
@@ -86,18 +63,17 @@ class CustomerSupportAgent:
             return "I'm sorry, I'm having trouble processing your request. Please try again later."
 
     def get_user_memories(self, user_id: str) -> List[str]:
-        """Retrieves all memories associated with a user."""
+        """Retrieves conversation history for a user."""
         try:
-            memories = self.memory.get_all(user_id=user_id)
-            if memories and "results" in memories:
-                return [m['memory'] for m in memories["results"] if 'memory' in m]
+            if user_id in self.conversations:
+                return [f"{msg['role']}: {msg['content']}" for msg in self.conversations[user_id]]
             return []
         except Exception as e:
             logger.error(f"Failed to fetch memories for {user_id}: {e}")
             return []
 
     def generate_synthetic_profile(self, user_id: str) -> Optional[Dict[str, Any]]:
-        """Generates a realistic customer profile and seeds the memory."""
+        """Generates a realistic customer profile."""
         try:
             logger.info(f"Generating synthetic profile for user {user_id}")
             today = datetime.now()
@@ -124,11 +100,12 @@ class CustomerSupportAgent:
                 content = content.split("```")[1].split("```")[0].strip()
 
             customer_data = json.loads(content)
-
-            # Seed memory with this data
-            for key, value in customer_data.items():
-                content_val = json.dumps(value) if isinstance(value, (list, dict)) else f"{key}: {value}"
-                self.memory.add(content_val, user_id=user_id, metadata={"app_id": self.app_id, "role": "system"})
+            
+            # Store profile in conversation as context
+            profile_msg = f"Customer Profile: {json.dumps(customer_data)}"
+            if user_id not in self.conversations:
+                self.conversations[user_id] = []
+            self.conversations[user_id].insert(0, {"role": "system", "content": profile_msg})
 
             return customer_data
         except Exception as e:

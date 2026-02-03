@@ -1,8 +1,6 @@
 fastapi
 uvicorn
 groq
-mem0ai
-qdrant-client
 pydantic-settings
 python-dotenv
 python-multipart
