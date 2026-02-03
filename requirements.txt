@@ -5,6 +5,4 @@ mem0ai
 qdrant-client
 pydantic-settings
 python-dotenv
-firecrawl-py
-fastembed
 python-multipart

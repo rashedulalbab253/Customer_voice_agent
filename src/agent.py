@@ -25,8 +25,10 @@ class CustomerSupportAgent:
             "vector_store": {
                 "provider": settings.MEMORY_PROVIDER,
                 "config": {
-                    "host": settings.QDRANT_HOST,
-                    "port": settings.QDRANT_PORT,
+                    # For local development without Docker, use local path
+                    "path": "qdrant_data", 
+                    # "host": settings.QDRANT_HOST,
+                    # "port": settings.QDRANT_PORT,
                 }
             },
             "llm": {

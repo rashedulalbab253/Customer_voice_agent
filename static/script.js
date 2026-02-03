@@ -130,8 +130,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ query: text, user_id: userId, api_key: apiKey })
             });
             const data = await response.json();
-            addMessage('assistant', data.response);
-            speak(data.response);
+            console.log("Server Response:", data);
+
+            if (data.response) {
+                addMessage('assistant', data.response);
+                speak(data.response);
+            } else if (data.detail) {
+                addMessage('assistant', `Error: ${data.detail}`);
+            } else {
+                addMessage('assistant', "Error: Received undefined response from server.");
+            }
         } catch (error) {
             addMessage('assistant', 'Error: Could not reach the server.');
         }

@@ -20,4 +20,3 @@ def setup_logger(name: str = "agent-logger") -> logging.Logger:
     return logger
 
 logger = setup_logger()
- village_logger = logger if logger is not None else logger
