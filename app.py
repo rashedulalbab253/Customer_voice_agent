@@ -5,12 +5,16 @@ from fastapi.responses import HTMLResponse, FileResponse
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 import os
+import sys
+import time
+
+# Ensure the 'src' directory can be imported
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from src.agent import CustomerSupportAgent
 from src.config import settings
 from src.utils import logger
 from src.analytics import analytics
-import time
 
 app = FastAPI(title="TechGadgets AI Support API")
 
@@ -24,8 +28,6 @@ app.add_middleware(
 )
 
 # Initialize Agent
-# In a real production environment, you might use a dependency 
-# or a singleton pattern.
 agent = None
 
 def get_agent(api_key: Optional[str] = None):
@@ -49,6 +51,10 @@ class ProfileRequest(BaseModel):
 
 @app.get("/")
 async def read_index():
+    return FileResponse("static/index.html")
+
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
     return FileResponse("static/index.html")
 
 @app.post("/chat")

@@ -13,13 +13,6 @@ class Settings(BaseSettings):
     GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
     GROQ_MODEL: str = "llama-3.3-70b-versatile"
     
-    # Qdrant Configuration
-    QDRANT_HOST: str = os.getenv("QDRANT_HOST", "localhost")
-    QDRANT_PORT: int = int(os.getenv("QDRANT_PORT", 6333))
-    
-    # Memory Configuration
-    MEMORY_PROVIDER: str = "qdrant"
-
     class Config:
         env_file = ".env"
 
