@@ -6,8 +6,8 @@ load_dotenv()
 
 class Settings(BaseSettings):
     """Application settings and configuration."""
-    APP_NAME: str = "AI Customer Support Agent"
-    APP_ID: str = "customer-support-pro"
+    APP_NAME: str = "OmniServe AI"
+    APP_ID: str = "omniserve-voice-platform"
     
     # Groq Configuration
     GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
@@ -15,5 +15,6 @@ class Settings(BaseSettings):
     
     class Config:
         env_file = ".env"
+        extra = "allow"
 
 settings = Settings()

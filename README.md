@@ -1,11 +1,11 @@
-# 🤖 TechGadgets AI: Premium Customer Support Agent
+# 🤖 OmniServe AI – Context-Aware Real-Time Voice Customer Support Platform
 
 [![Docker Build](https://github.com/rashedulalbab253/Customer_voice_agent/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/rashedulalbab253/Customer_voice_agent/actions)
 [![Docker Pulls](https://img.shields.io/docker/pulls/rashedulalbab1234/techgadgets-ai-agent)](https://hub.docker.com/r/rashedulalbab1234/techgadgets-ai-agent)
 [![Python Version](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109.0-009688.svg)](https://fastapi.tiangolo.com/)
 
-An industry-standard, voice-enabled AI support agent designed for premium e-commerce. Built with **FastAPI**, **Groq (Llama 3.3)**, and a sleek **Glassmorphism UI**, this system provides human-like interaction with persistent context and real-time analytics.
+**OmniServe AI** is an industry-standard, context-aware **Voice Customer Support Platform** designed for real-time engagement. Built with **FastAPI**, **Groq (Llama 3.3)**, and a sleek **Glassmorphism UI**, this system provides human-like interaction with persistent context and real-time analytics.
 
 ---
 

@@ -16,7 +16,7 @@ from src.config import settings
 from src.utils import logger
 from src.analytics import analytics
 
-app = FastAPI(title="TechGadgets AI Support API")
+app = FastAPI(title="OmniServe AI - Context-Aware Voice Support")
 
 # Enable CORS for frontend development
 app.add_middleware(

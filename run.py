@@ -7,7 +7,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 if __name__ == "__main__":
-    print("🚀 Starting TechGadgets AI Support Agent...")
+    print("🚀 Starting OmniServe AI: Voice Support Platform...")
     print("📍 URL: http://localhost:8000")
     print("Press Ctrl+C to stop the server.")
     

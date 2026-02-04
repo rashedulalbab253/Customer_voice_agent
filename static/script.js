@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // We'll just test a chat or assume it's fine for now 
         // In a real app, we might have a dedicated /init endpoint
         updateStatus(true, 'Agent Online');
-        addMessage('assistant', `Agent initialized for customer: <strong>${userId}</strong>. How can I help you?`);
+        addMessage('assistant', `OmniServe AI initialized for customer: <strong>${userId}</strong>. How can I help you?`);
     };
 
     const sendMessage = async () => {
