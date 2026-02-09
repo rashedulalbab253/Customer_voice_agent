@@ -326,11 +326,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 recentData.interactions.forEach(interaction => {
                     const card = document.createElement('div');
                     card.className = 'interaction-card';
+
+                    const safeQuery = (interaction.query || "").substring(0, 50);
+                    const safeResponse = (interaction.response || "").substring(0, 50);
+                    const safeUser = interaction.user_id || "Anonymous";
+                    const safeTime = typeof interaction.response_time === 'number' ? interaction.response_time.toFixed(2) : "0.00";
+
                     card.innerHTML = `
-                        <strong>${interaction.user_id}</strong>
-                        <p><em>Q:</em> ${interaction.query.substring(0, 50)}...</p>
-                        <p><em>A:</em> ${interaction.response.substring(0, 50)}...</p>
-                        <small>${interaction.response_time.toFixed(2)}s</small>
+                        <strong>${safeUser}</strong>
+                        <p><em>Q:</em> ${safeQuery}...</p>
+                        <p><em>A:</em> ${safeResponse}...</p>
+                        <small>${safeTime}s</small>
                     `;
                     recentDiv.appendChild(card);
                 });
