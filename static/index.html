@@ -23,11 +23,17 @@
             <p class="tagline">Context-Aware Real-Time Support</p>
 
             <div class="settings-group">
-                <label for="apiKey">Groq API Key</label>
-                <input type="password" id="apiKey" placeholder="gsk_...">
+                <label for="apiKey">Google API Key</label>
+                <input type="password" id="apiKey" placeholder="AIzaSy...">
 
                 <label for="userId">Customer ID</label>
                 <input type="text" id="userId" placeholder="cust_001">
+
+                <label for="languageSelect">Preferred Language</label>
+                <select id="languageSelect" class="lang-select">
+                    <option value="en-US">English</option>
+                    <option value="bn-BD">বাংলা (Bengali)</option>
+                </select>
 
                 <button id="initAgent" class="btn primary">Initialize Agent</button>
             </div>
@@ -41,6 +47,12 @@
             <div id="profileDisplay" class="profile-card hidden">
                 <h3>Customer Profile</h3>
                 <pre id="profileJson"></pre>
+            </div>
+
+            <div class="developer-credit">
+                <div class="line"></div>
+                <p>Designed & Developed by</p>
+                <div class="developer-name">Rashedul Albab</div>
             </div>
         </aside>
 

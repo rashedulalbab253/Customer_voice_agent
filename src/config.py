@@ -12,6 +12,10 @@ class Settings(BaseSettings):
     # Groq Configuration
     GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
     GROQ_MODEL: str = "llama-3.3-70b-versatile"
+
+    # Gemini Configuration
+    GOOGLE_API_KEY: str = os.getenv("GOOGLE_API_KEY", "")
+    GEMINI_MODEL: str = "models/gemini-flash-latest"
     
     class Config:
         env_file = ".env"

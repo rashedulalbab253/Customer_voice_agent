@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const micBtn = document.getElementById('micBtn');
     const autoSpeakCheck = document.getElementById('autoSpeak');
+    const languageSelect = document.getElementById('languageSelect');
 
     let initialized = false;
     let isRecording = false;
@@ -25,22 +26,27 @@ document.addEventListener('DOMContentLoaded', () => {
     if (recognition) {
         recognition.continuous = false;
         recognition.interimResults = true;  // Show what's being said in real-time
-        recognition.lang = 'en-US';
+        recognition.lang = languageSelect.value;
         recognition.maxAlternatives = 3;  // Get multiple interpretations
+
+        languageSelect.addEventListener('change', () => {
+            recognition.lang = languageSelect.value;
+            console.log("Language changed to:", recognition.lang);
+        });
 
         recognition.onstart = () => {
             isRecording = true;
             micBtn.classList.add('recording');
-            updateStatus(true, 'Listening... (speak clearly)');
+            updateStatus(true, languageSelect.value === 'bn-BD' ? 'শুনছি... (স্পষ্টভাবে বলুন)' : 'Listening... (speak clearly)');
             userInput.value = '';  // Clear input when starting
-            userInput.placeholder = 'Listening...';
+            userInput.placeholder = languageSelect.value === 'bn-BD' ? 'শুনছি...' : 'Listening...';
         };
 
         recognition.onend = () => {
             isRecording = false;
             micBtn.classList.remove('recording');
             updateStatus(true, 'Agent Online');
-            userInput.placeholder = 'Ask about your orders, preferences...';
+            userInput.placeholder = languageSelect.value === 'bn-BD' ? 'আপনার প্রশ্নটি বলুন...' : 'Ask about your orders, preferences...';
         };
 
         recognition.onresult = (event) => {
@@ -56,6 +62,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
 
+            console.log("Interim:", interimTranscript);
+            console.log("Final:", finalTranscript);
+
             // Show interim results in the input box
             if (interimTranscript) {
                 userInput.value = interimTranscript;
@@ -63,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // When final, send the message
-            if (finalTranscript) {
+            if (finalTranscript.trim()) {
                 userInput.value = finalTranscript.trim();
                 userInput.style.fontStyle = 'normal';
                 sendMessage();
@@ -77,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updateStatus(true, 'Agent Online');
 
             if (event.error === 'no-speech') {
-                userInput.placeholder = 'No speech detected. Try again.';
+                userInput.placeholder = languageSelect.value === 'bn-BD' ? 'কোনো কথা শোনা যায়নি।' : 'No speech detected. Try again.';
             } else if (event.error === 'audio-capture') {
                 alert('Microphone not found. Please check your microphone settings.');
             } else if (event.error === 'not-allowed') {
@@ -93,6 +102,7 @@ document.addEventListener('DOMContentLoaded', () => {
         window.speechSynthesis.cancel();
 
         const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = languageSelect.value;
         utterance.rate = 0.95;  // Slightly slower for clarity
         utterance.pitch = 1.0;
         utterance.volume = 1.0;
@@ -100,26 +110,30 @@ document.addEventListener('DOMContentLoaded', () => {
         // Wait for voices to load, then select the best one
         const setVoice = () => {
             const voices = window.speechSynthesis.getVoices();
-
-            // Prefer these voices in order (more natural sounding)
-            const preferredVoices = [
-                'Google US English',
-                'Microsoft Zira',
-                'Microsoft David',
-                'Google UK English Female',
-                'Samantha',
-                'Alex'
-            ];
-
             let selectedVoice = null;
-            for (const preferred of preferredVoices) {
-                selectedVoice = voices.find(v => v.name.includes(preferred));
-                if (selectedVoice) break;
-            }
 
-            // Fallback to any English voice
-            if (!selectedVoice) {
-                selectedVoice = voices.find(v => v.lang.startsWith('en'));
+            if (languageSelect.value === 'bn-BD') {
+                // Try to find a Bengali voice
+                selectedVoice = voices.find(v => v.lang.startsWith('bn'));
+            } else {
+                // Prefer English voices
+                const preferredVoices = [
+                    'Google US English',
+                    'Microsoft Zira',
+                    'Microsoft David',
+                    'Google UK English Female',
+                    'Samantha',
+                    'Alex'
+                ];
+
+                for (const preferred of preferredVoices) {
+                    selectedVoice = voices.find(v => v.name.includes(preferred));
+                    if (selectedVoice) break;
+                }
+
+                if (!selectedVoice) {
+                    selectedVoice = voices.find(v => v.lang.startsWith('en'));
+                }
             }
 
             if (selectedVoice) {
@@ -162,18 +176,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const initializeAgent = async () => {
         const apiKey = apiKeyInput.value.trim();
         const userId = userIdInput.value.trim();
+        const lang = languageSelect.value;
 
         if (!apiKey || !userId) {
             alert('Please provide both API Key and Customer ID');
             return;
         }
 
-        updateStatus(false, 'Connecting...');
+        updateStatus(false, lang === 'bn-BD' ? 'সংযুক্ত হচ্ছে...' : 'Connecting...');
 
-        // We'll just test a chat or assume it's fine for now 
-        // In a real app, we might have a dedicated /init endpoint
         updateStatus(true, 'Agent Online');
-        addMessage('assistant', `OmniServe AI initialized for customer: <strong>${userId}</strong>. How can I help you?`);
+
+        const welcomeMsg = lang === 'bn-BD'
+            ? `OmniServe AI গ্রাহক <strong>${userId}</strong> এর জন্য প্রস্তুত। আমি আপনাকে কীভাবে সাহায্য করতে পারি?`
+            : `OmniServe AI initialized for customer: <strong>${userId}</strong>. How can I help you?`;
+
+        addMessage('assistant', welcomeMsg);
     };
 
     const sendMessage = async () => {
@@ -337,6 +355,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isRecording) {
             recognition.stop();
         } else {
+            // Set language right before starting to ensure it's current
+            recognition.lang = languageSelect.value;
+            console.log("Starting recognition with language:", recognition.lang);
             recognition.start();
         }
     });

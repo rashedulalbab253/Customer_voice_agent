@@ -78,7 +78,8 @@ async def chat(data: ChatQuery):
         import traceback
         error_detail = traceback.format_exc()
         logger.error(f"Chat error: {e}\n{error_detail}")
-        raise HTTPException(status_code=500, detail=str(e))
+        # Return the error message to the frontend for debugging
+        return {"error": str(e), "response": f"I encountered an error: {str(e)}"}
 
 @app.post("/generate-profile")
 async def generate_profile(data: ProfileRequest):

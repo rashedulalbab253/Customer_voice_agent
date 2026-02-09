@@ -127,7 +127,8 @@ label {
     color: var(--text-muted);
 }
 
-input {
+input,
+.lang-select {
     width: 100%;
     padding: 0.75rem 1rem;
     background: rgba(255, 255, 255, 0.03);
@@ -136,12 +137,23 @@ input {
     color: white;
     outline: none;
     transition: all 0.3s ease;
+    appearance: none;
+    /* Remove default arrow */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='white' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: calc(100% - 1rem) center;
 }
 
-input:focus {
+input:focus,
+.lang-select:focus {
     border-color: var(--primary);
-    background: rgba(255, 255, 255, 0.06);
+    background-color: rgba(255, 255, 255, 0.06);
     box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15);
+}
+
+.lang-select option {
+    background-color: var(--bg-sidebar);
+    color: white;
 }
 
 .btn {
@@ -195,6 +207,38 @@ input:focus {
     white-space: pre-wrap;
     word-break: break-all;
     color: var(--text-muted);
+}
+
+/* Developer Credit */
+.developer-credit {
+    margin-top: auto;
+    padding-top: 2rem;
+    text-align: center;
+}
+
+.developer-credit .line {
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--border), transparent);
+    margin-bottom: 1.5rem;
+}
+
+.developer-credit p {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+}
+
+.developer-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-main);
+    background: linear-gradient(to right, #f8fafc, #94a3b8);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-family: 'Outfit', sans-serif;
 }
 
 /* Chat Area */
